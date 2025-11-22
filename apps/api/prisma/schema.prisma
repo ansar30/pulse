@@ -1,0 +1,150 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  planId    String   @default("free")
+  status    String   @default("ACTIVE") // ACTIVE, SUSPENDED, TRIAL
+  settings  Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     User[]
+  projects  Project[]
+  auditLogs AuditLog[]
+  channels  Channel[]
+
+  @@map("tenants")
+}
+
+model User {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  tenantId     String   @db.ObjectId
+  email        String   @unique
+  passwordHash String
+  role         String   @default("MEMBER") // SUPER_ADMIN, ADMIN, MEMBER, VIEWER
+  profile      Json
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant             Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  auditLogs          AuditLog[]
+  channelMemberships ChannelMember[]
+  messages           Message[]
+
+  @@index([tenantId])
+  @@map("users")
+}
+
+model Project {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  tenantId    String   @db.ObjectId
+  name        String
+  description String?
+  settings    Json     @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  resources Resource[]
+
+  @@index([tenantId])
+  @@map("projects")
+}
+
+model Resource {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  projectId String   @db.ObjectId
+  tenantId  String   @db.ObjectId
+  type      String
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([tenantId])
+  @@map("resources")
+}
+
+model AuditLog {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  tenantId  String   @db.ObjectId
+  userId    String   @db.ObjectId
+  action    String
+  payload   Json     @default("{}")
+  createdAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model Channel {
+  id          String          @id @default(auto()) @map("_id") @db.ObjectId
+  tenantId    String          @db.ObjectId
+  name        String
+  description String?
+  type        String          @default("PUBLIC") // PUBLIC, PRIVATE, DIRECT
+  createdBy   String          @db.ObjectId
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  
+  tenant      Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  messages    Message[]
+  members     ChannelMember[]
+  
+  @@index([tenantId])
+  @@index([type])
+  @@map("channels")
+}
+
+model ChannelMember {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  channelId String   @db.ObjectId
+  userId    String   @db.ObjectId
+  role      String   @default("MEMBER") // OWNER, ADMIN, MEMBER
+  lastRead  DateTime @default(now())
+  joinedAt  DateTime @default(now())
+  
+  channel   Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([channelId, userId])
+  @@index([userId])
+  @@map("channel_members")
+}
+
+model Message {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  channelId String   @db.ObjectId
+  userId    String   @db.ObjectId
+  content   String
+  type      String   @default("TEXT") // TEXT, FILE, IMAGE, SYSTEM
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  channel   Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([channelId, createdAt])
+  @@index([userId])
+  @@map("messages")
+}

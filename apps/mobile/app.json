@@ -1,0 +1,46 @@
+{
+    "expo": {
+        "name": "Pulse",
+        "slug": "pulse",
+        "version": "1.0.0",
+        "orientation": "portrait",
+        "icon": "./assets/icon.png",
+        "userInterfaceStyle": "light",
+        "splash": {
+            "image": "./assets/splash.png",
+            "resizeMode": "contain",
+            "backgroundColor": "#0f172a"
+        },
+        "assetBundlePatterns": [
+            "**/*"
+        ],
+        "ios": {
+            "supportsTablet": true,
+            "bundleIdentifier": "com.pulse.mobile"
+        },
+        "android": {
+            "adaptiveIcon": {
+                "foregroundImage": "./assets/adaptive-icon.png",
+                "backgroundColor": "#0f172a"
+            },
+            "package": "com.pulse.mobile"
+        },
+        "web": {
+            "favicon": "./assets/favicon.png",
+            "bundler": "metro"
+        },
+        "plugins": [
+            "expo-router",
+            [
+                "expo-image-picker",
+                {
+                    "photosPermission": "The app accesses your photos to let you set your profile picture."
+                }
+            ]
+        ],
+        "scheme": "pulse",
+        "extra": {
+            "apiUrl": "http://192.168.1.2:3001"
+        }
+    }
+}

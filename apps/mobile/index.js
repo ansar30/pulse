@@ -1,0 +1,3 @@
+require('expo-router/entry');
+
+

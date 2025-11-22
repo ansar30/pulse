@@ -1,0 +1,67 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Testing
+coverage
+*.log
+
+# Next.js
+.next
+out
+build
+dist
+
+# Expo
+.expo
+.expo-shared
+.expo/
+dist/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+
+# Environment
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.production
+.env.*.local
+
+# Turbo
+.turbo
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Prisma
+prisma/migrations
+
+# Misc
+*.pem
+.vercel
+
+# EAS
+.eas/
+eas.json.local
+
+# Render
+.render/
+
+# Lock files (optional - some teams commit these)
+# pnpm-lock.yaml
